@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PoE Weapon Search</title>
+  <!-- Bootstrap CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+<div class="container">
+  <h1 class="mb-4">Path of Exile Weapon Search</h1>
+  
+  <!-- Search Form -->
+  <form method="get" class="row g-3 mb-4 border rounded p-3 bg-light">
+    <div class="col-md-3">
+      <label class="form-label">Weapon Type</label>
+      <select name="weapon_class" class="form-select">
+        <option value="">Any</option>
+        <option value="Bows" {% if filters.weapon_class == "Bows" %}selected{% endif %}>Bows</option>
+        <option value="One Hand Swords" {% if filters.weapon_class == "One Hand Swords" %}selected{% endif %}>One Hand Swords</option>
+        <option value="Two Hand Swords" {% if filters.weapon_class == "Two Hand Swords" %}selected{% endif %}>Two Hand Swords</option>
+        <!-- (Include other classes like Axes, Claws, etc. as needed) -->
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Damage Type</label>
+      <select name="damage_type" class="form-select">
+        <option value="All" {% if filters.damage_type == "All" %}selected{% endif %}>All</option>
+        <option value="Physical" {% if filters.damage_type == "Physical" %}selected{% endif %}>Physical</option>
+        <option value="Elemental" {% if filters.damage_type == "Elemental" %}selected{% endif %}>Elemental</option>
+        <option value="Chaos" {% if filters.damage_type == "Chaos" %}selected{% endif %}>Chaos</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Attack Speed Min</label>
+      <input type="number" step="0.1" name="min_aps" value="{{ filters.min_aps }}" class="form-control" placeholder="e.g. 1.0">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Attack Speed Max</label>
+      <input type="number" step="0.1" name="max_aps" value="{{ filters.max_aps }}" class="form-control" placeholder="e.g. 2.0">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Min DPS</label>
+      <input type="number" name="min_dps" value="{{ filters.min_dps }}" class="form-control" placeholder="Any">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Max DPS</label>
+      <input type="number" name="max_dps" value="{{ filters.max_dps }}" class="form-control" placeholder="Any">
+    </div>
+    <div class="col-md-3 align-self-end">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+  </form>
+  
+  <!-- Results Table -->
+  {% if results %}
+    <h2 class="mb-3">Results</h2>
+    <table class="table table-striped table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Attack Speed</th>
+          <th>Physical DPS</th>
+          <th>Elemental DPS</th>
+          <th>Total DPS</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in results %}
+        <tr>
+          <td>
+            <!-- Link to the item’s wiki page using the name -->
+            <a href="https://www.poewiki.net/wiki/{{ item.name|urlencode }}">{{ item.name }}</a>
+          </td>
+          <td>{{ item.class }}</td>
+          <td>{{ item.attack_speed }}</td>
+          <td>{{ item.physical_dps }}</td>
+          <td>{{ item.elemental_dps }}</td>
+          <td>{{ item.total_dps }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    {% if filters %} 
+      <p><em>No matching weapons found for the given criteria.</em></p>
+    {% endif %}
+  {% endif %}
+  
+</div>
+</body>
+</html>
