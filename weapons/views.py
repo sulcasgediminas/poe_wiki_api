@@ -49,21 +49,36 @@ def search_weapons(request):
         # Finalize URL with format=json for direct JSON output
         api_url = f"{base_url}{join}{fields}{where_clause}&format=json"
         
-        # Fetch data from the Wiki API
-        response = requests.get(api_url)
-        data = response.json()  # Parse JSON response
+        # Fetch data from the Wiki API. A custom User-Agent prevents requests from
+        # being blocked by the wiki and makes debugging easier.
+        headers = {
+            "User-Agent": "poe-wiki-api/1.0 (+https://example.com)"
+        }
         results = []
-        for entry in data.get("cargoquery", []):
-            item = entry["title"]
-            # Prepare each result (convert numeric strings to float/int as needed)
-            results.append({
-                "name": item.get("name"),
-                "class": item.get("class"),
-                "attack_speed": item.get("attack_speed"),
-                "physical_dps": item.get("physical_dps_range_average"),
-                "elemental_dps": item.get("elemental_dps_range_average"),
-                "total_dps": item.get("dps_range_average"),
-            })
+        try:
+            response = requests.get(api_url, headers=headers, timeout=10)
+            response.raise_for_status()
+            data = response.json()  # Parse JSON response
+            for entry in data.get("cargoquery", []):
+                item = entry["title"]
+                # Prepare each result (convert numeric strings to float/int as
+                # needed)
+                results.append({
+                    "name": item.get("name"),
+                    "class": item.get("class"),
+                    "attack_speed": item.get("attack_speed"),
+                    "physical_dps": item.get(
+                        "physical_dps_range_average"
+                    ),
+                    "elemental_dps": item.get(
+                        "elemental_dps_range_average"
+                    ),
+                    "total_dps": item.get("dps_range_average"),
+                })
+        except (requests.RequestException, ValueError) as exc:
+            # If the API call fails or returns invalid JSON, keep results empty
+            # and attach the error message so the template can show feedback.
+            context["error"] = str(exc)
         context["results"] = results
         context["filters"] = {   # include current filters to refill form, if needed
             "weapon_class": weapon_class or "",
