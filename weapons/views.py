@@ -19,7 +19,7 @@ def search_weapons(request):
         fields = "&fields=items.name,items.class,weapons.attack_speed," \
                  "weapons.physical_dps_range_average,weapons.elemental_dps_range_average," \
                  "weapons.chaos_dps_range_average,weapons.dps_range_average"
-        conditions = []
+        conditions = ["weapons.attack_speed IS NOT NULL"]
         # Add conditions based on filters
         if weapon_class: 
             conditions.append(f'items.class="{weapon_class}"')
